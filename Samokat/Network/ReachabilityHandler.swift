@@ -72,7 +72,6 @@ class ReachabilityHandler: ReachabilityObserverDelegate {
             UIApplication.topViewController()?.dismiss(animated: false, completion: {
                 nav?.pushViewController(vc, animated: false)
             })
-            print(AppShared.sharedInstance.navigationController.isNavigationBarHidden)
         }
     }
 }

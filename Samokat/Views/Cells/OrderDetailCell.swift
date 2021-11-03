@@ -12,6 +12,13 @@ import SnapKit
 
 class OrderDetailCell: UITableViewCell {
     static var customReuseIdentifier = "OrderDetailCell"
+    var product: Product? {
+        didSet {
+            photo.kf.setImage(with: URL(string: product?.icon ?? ""))
+            titleLabel.text = product?.details?.title
+            priceLabel.text = "\(Double(product?.price?.currentPrice ?? "0")?.formattedWithSeparator ?? "") ₸"
+        }
+    }
     
    lazy var photo: UIImageView = {
         let view = UIImageView()

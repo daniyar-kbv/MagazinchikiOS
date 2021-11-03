@@ -21,7 +21,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         let window = UIWindow(windowScene: windowScene)
         AppShared.sharedInstance.keyWindow = window
-        let vc = ModuleUserDefaults.getToken() == nil ? FirstScreenViewController() : MainPageViewController()
+        let vc = !ModuleUserDefaults.getIsLoggedIn() ? FirstScreenViewController() : MainPageViewController()
+//        let vc = LocationViewController()
         let nav = NavigationController(rootViewController: vc)
         AppShared.sharedInstance.navigationController = nav
         window.rootViewController = nav // Your initial view controller.
@@ -47,8 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
+        AppShared.sharedInstance.checkCategories()
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {

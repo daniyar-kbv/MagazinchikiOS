@@ -11,6 +11,11 @@ import UIKit
 
 class OrderDetailViewController: UIViewController {
     lazy var orderView = OrderDetailView()
+    var order: Order? {
+        didSet {
+            orderView.order = order
+        }
+    }
     
     override func loadView() {
         super.loadView()
@@ -45,17 +50,20 @@ class OrderDetailViewController: UIViewController {
     }
     
     @objc func openBill(){
-        openTop(vc: BillViewController())
+        let vc = BillViewController()
+        vc.order = order
+        openTop(vc: vc)
     }
 }
 
 extension OrderDetailViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return order?.products?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: OrderDetailCell.customReuseIdentifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: OrderDetailCell.customReuseIdentifier, for: indexPath) as! OrderDetailCell
+        cell.product = order?.products?[indexPath.row]
         return cell
     }
 }

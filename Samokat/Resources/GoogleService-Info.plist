@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>927258351556-77crqb261ffckp9rbuqror5pb9jss651.apps.googleusercontent.com</string>
+	<string>927258351556-029entigkio41297lmr61c3disj08pjn.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.927258351556-77crqb261ffckp9rbuqror5pb9jss651</string>
+	<string>com.googleusercontent.apps.927258351556-029entigkio41297lmr61c3disj08pjn</string>
 	<key>API_KEY</key>
 	<string>AIzaSyAesf7IiK8J69CT3AP3q0toTnVohjUuPNo</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>mti.kz.Samokat</string>
+	<string>mti.kz.Mario</string>
 	<key>PROJECT_ID</key>
 	<string>darkstore-5d890</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,7 +29,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:927258351556:ios:d1cfe830b98e89e9013691</string>
+	<string>1:927258351556:ios:0193fd08492b53f2013691</string>
 	<key>DATABASE_URL</key>
 	<string>https://darkstore-5d890.firebaseio.com</string>
 </dict>

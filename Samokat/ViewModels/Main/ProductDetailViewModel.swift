@@ -27,9 +27,9 @@ class ProductDetailViewModel {
     init(id: Int){
         self.product = PublishSubject<Product>()
         SpinnerView.showSpinnerView()
-        APIManager.shared.getProduct(id: id) { error, response in
-            SpinnerView.removeSpinnerView()
-            self.response = response
-        }
+//        APIManager.shared.getProduct(id: id) { error, response in
+//            SpinnerView.removeSpinnerView()
+//            self.response = response
+//        }
     }
 }

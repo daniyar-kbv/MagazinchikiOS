@@ -18,11 +18,6 @@ class PhoneResponse: Codable {
 
 
 class PhoneData: Codable {
-    var transactionId: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case transactionId
-    }
 }
 
 
@@ -35,9 +30,4 @@ class CheckSmsResponse: Codable {
 }
 
 class CheckSmsData: Codable {
-    var token: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case token
-    }
 }

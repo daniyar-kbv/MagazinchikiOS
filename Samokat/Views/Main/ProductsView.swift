@@ -33,17 +33,10 @@ class ProductsView: UIView {
     }
     
     func setUp(){
-        AppShared.sharedInstance.topFilterView = TopFilterView()
-        
-        addSubViews([productsCollection, AppShared.sharedInstance.topFilterView, cartView])
+        addSubViews([productsCollection, cartView])
         
         productsCollection.snp.makeConstraints({
             $0.edges.equalToSuperview()
-        })
-        
-        AppShared.sharedInstance.topFilterView.snp.makeConstraints({
-            $0.centerX.equalToSuperview()
-            $0.top.equalToSuperview().offset(-StaticSize.s50)
         })
         
         if AppShared.sharedInstance.cart.items?.count ?? 0 > 0{

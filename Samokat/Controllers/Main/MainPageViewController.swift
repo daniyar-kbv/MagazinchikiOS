@@ -32,6 +32,12 @@ class MainPageViewController: UIViewController {
         confogActions()
         
         viewModel = MainPageViewModel()
+        viewModel?.loadView = mainView.tableView
+        if let categories = AppShared.sharedInstance.categories {
+            self.categories = categories
+        } else {
+            viewModel?.getCategories()
+        }
         bind()
     }
     
@@ -41,15 +47,34 @@ class MainPageViewController: UIViewController {
         view = mainView
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.isNavigationBarHidden = true
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if mainView.tableView.subviews.count > 2{
+        if mainView.tableView.subviews.count > 2, let categories = categories{
             for i in 0..<mainView.tableView.numberOfSections{
-                var imageName = "frameBread"
-                if i == 1{
-                    imageName = "frameBakaleya"
-                }
-                let image = UIImageView(image: UIImage(named: imageName)!)
+                let image: UIImageView = {
+                    let view = UIImageView()
+                    view.image = UIImage(named: "bigFigure")?.withRenderingMode(.alwaysTemplate)
+                    view.tintColor = UIColor(hex: categories[i].bgColor ?? "#cccccc")
+                    view.clipsToBounds = true
+                    return view
+                }()
+                let innerImage: UIImageView = {
+                    let view = UIImageView()
+                    view.kf.setImage(with: URL(string: categories[i].icon ?? ""))
+                    return view
+                }()
+                image.addSubViews([innerImage])
+                innerImage.snp.makeConstraints({
+                    $0.top.right.equalToSuperview()
+                    $0.width.equalTo(StaticSize.s1 * 163)
+                    $0.height.equalTo(StaticSize.s1 * 216)
+                })
                 var sectionRect = mainView.tableView.rect(forSection: i)
                 sectionRect.size.height -= (footerHeight - StaticSize.s20)
                 let view = UIView(frame: sectionRect)
@@ -64,10 +89,14 @@ class MainPageViewController: UIViewController {
     }
     
     private func bind() {
-        guard let viewModel = viewModel else { return }
-        viewModel.categories.subscribe(onNext: { categories in
+        AppShared.sharedInstance.categoriesSubject.subscribe(onNext: { categories in
             DispatchQueue.main.async {
                 self.categories = categories
+            }
+        }).disposed(by: disposeBag)
+        AppShared.sharedInstance.selectedCategory.subscribe(onNext: { row in
+            DispatchQueue.main.async {
+                self.mainView.tableView.scrollToRow(at: IndexPath(row: row, section: 0), at: .none, animated: true)
             }
         }).disposed(by: disposeBag)
     }
@@ -75,6 +104,11 @@ class MainPageViewController: UIViewController {
     func confogActions(){
         mainView.smallFigureView.addTarget(self, action: #selector(openMainPageModal), for: .touchUpInside)
         mainView.searchField.field.addTarget(self, action: #selector(onSearch), for: .editingDidBegin)
+        NotificationCenter.default.addObserver(self, selector: #selector(onWillEnterForegroundNotification), name: UIApplication.willEnterForegroundNotification, object: nil)
+    }
+    
+    @objc func onWillEnterForegroundNotification(){
+        
     }
     
     @objc func onSearch(){
@@ -95,13 +129,6 @@ extension MainPageViewController: UITableViewDelegate, UITableViewDataSource{
         if indexPath.row == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: MainTableViewHeader.customReuseIdentifier, for: indexPath) as! MainTableViewHeader
             let title = self.categories?[indexPath.section].title ?? ""
-            cell.title.onTap = {
-                let vc = ProductsViewController()
-                vc.title = title
-                vc.categoryId = self.categories?[indexPath.section].id
-                AppShared.sharedInstance.selectedFilter = self.categories?[indexPath.section].subCategories?.first?.id
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
             cell.setTitle(text: title)
             cell.backgroundColor = .clear
             return cell
@@ -138,14 +165,12 @@ extension MainPageViewController: UITableViewDelegate, UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc = ProductsViewController()
-        vc.title = self.categories?[indexPath.section].title ?? ""
-        vc.categoryId = self.categories?[indexPath.section].id
         if indexPath.row != 0{
-            AppShared.sharedInstance.selectedFilter = categories?[indexPath.section].subCategories?[indexPath.row - 1].id
-        } else {
-            AppShared.sharedInstance.selectedFilter = self.categories?[indexPath.section].subCategories?.first?.id
+            AppShared.sharedInstance.selectedFilter = categories?[indexPath.section].subCategories?[indexPath.row - 1].tags?.first?.id
+            let vc = ProductsViewController()
+            vc.title = self.categories?[indexPath.section].subCategories?[indexPath.row - 1].title ?? ""
+            vc.productsView.productsCollection.subCategory = self.categories?[indexPath.section].subCategories?[indexPath.row - 1]
+            navigationController?.pushViewController(vc, animated: true)
         }
-        navigationController?.pushViewController(vc, animated: true)
     }
 }

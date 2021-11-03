@@ -9,8 +9,10 @@
 import Foundation
 import UIKit
 import SnapKit
+import RxSwift
 
 class AddressView: UIView {
+    lazy var disposeBag = DisposeBag()
     var withAddress: Bool = false {
         didSet {
             addressLabel.isHidden = !withAddress
@@ -23,6 +25,7 @@ class AddressView: UIView {
     lazy var editButton: UIButton = {
         let view = UIButton()
         view.setBackgroundImage(UIImage(named: "pencil"), for: .normal)
+        view.addTarget(self, action: #selector(editAddressPressed), for: .touchUpInside)
         return view
     }()
     
@@ -45,7 +48,7 @@ class AddressView: UIView {
         let view = CustomLabel()
         view.font = .systemFont(ofSize: StaticSize.s12, weight: .medium)
         view.textColor = .customTextBlack
-        view.text = "Орбита 1 микрорайон, дом 38, кв 94"
+        view.text = AppShared.sharedInstance.address?.getAddress()
         return view
     }()
     
@@ -55,10 +58,19 @@ class AddressView: UIView {
         profileButton.addTarget(self, action: #selector(openProfile(sender:)), for: .touchUpInside)
         
         setUp()
+        bind()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func bind(){
+        AppShared.sharedInstance.addressSubject.subscribe(onNext: { address in
+            DispatchQueue.main.async {
+                self.addressView.text = address.getAddress()
+            }
+        }).disposed(by: disposeBag)
     }
     
     func setUp(){
@@ -99,5 +111,13 @@ class AddressView: UIView {
         if let vc = viewContainingController(){
             vc.navigationController?.pushViewController(ProfileViewController(), animated: true)
         }
+    }
+    
+    @objc func editAddressPressed(){
+        guard let vc = viewContainingController() else { return }
+        vc.dismiss(animated: true, completion: nil)
+        let toVc = LocationViewController()
+        toVc.fromMain = true
+        AppShared.sharedInstance.navigationController.pushViewController(toVc, animated: true)
     }
 }

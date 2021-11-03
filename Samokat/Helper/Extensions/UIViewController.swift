@@ -8,21 +8,9 @@
 
 import Foundation
 import UIKit
+import CoreLocation
 
-extension UIViewController {
-    func showSpinnerView(){
-        view.addSubview(SpinnerView.view)
-        SpinnerView.view.snp.makeConstraints({
-            $0.edges.equalToSuperview()
-        })
-        SpinnerView.isLoading = true
-    }
-    
-    func removeSpinnerView(){
-        SpinnerView.view.removeFromSuperview()
-        SpinnerView.isLoading = false
-    }
-    
+extension UIViewController {    
     func add(_ child: UIViewController) {
         addChild(child)
         view.addSubview(child.view)
@@ -182,5 +170,69 @@ extension UIViewController {
     func disableKeyboardDisplay(_ vc: UIViewController){
         NotificationCenter.default.removeObserver(vc, name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.removeObserver(vc, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+//    MARK: - Permissions
+    
+    func askLocationPermission() {
+        switch CLLocationManager.authorizationStatus() {
+            case .authorizedAlways, .authorizedWhenInUse:
+                print("Location allowed")
+            case .notDetermined:
+                CLLocationManager().requestAlwaysAuthorization()
+            case .restricted, .denied:
+                let alertController = UIAlertController(
+                    title: "Отсутствует доступ к гелокации",
+                    message: "Пожалуйста, откройте настройки и разрешите использовать ваше местоположение",
+                    preferredStyle: .alert)
+                
+                let cancelAction = UIAlertAction(title: "Закрыть", style: .cancel, handler: nil)
+                alertController.addAction(cancelAction)
+                
+                let openAction = UIAlertAction(title: "Настройки", style: .default) { (action) in
+                    if let url = NSURL(string: UIApplication.openSettingsURLString) {
+
+                        if #available(iOS 10, *) {
+                            UIApplication.shared.open(url as URL, options: [:],
+                                                      completionHandler: {
+                                                        (success) in
+                                                        print("Open \(success)")
+                            })
+                        } else {
+                            let success = UIApplication.shared.openURL(url as URL)
+                            print("Open \(success)")
+                        }
+                        
+                    }
+                }
+                alertController.addAction(openAction)
+                
+                self.present(alertController, animated: true, completion: nil)
+            @unknown default:
+                break
+        }
+    }
+    
+    func popToMain(){
+        let nav = AppShared.sharedInstance.navigationController
+        for _ in 0..<self.toMainCount(){
+            nav?.popViewController(animated: false)
+        }
+    }
+    
+    func toMainCount() -> Int {
+        let nav = AppShared.sharedInstance.navigationController
+        guard let vcs = nav?.viewControllers else { return 2 }
+        var found = false
+        var count = 0
+        for vc in vcs{
+            if found {
+                count += 1
+            }
+            if vc is MainPageViewController{
+                found = true
+            }
+        }
+        return count
     }
 }

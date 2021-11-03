@@ -10,247 +10,65 @@ import Foundation
 
 struct APIManager {
     static let shared = APIManager()
+    let router = MyRouter<APIPoint>()
     
-    func getCategories(completion:@escaping(_ error:String?,_ module:CategoriesResponse?)->()) {
-        router.request(.categories) {data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                completion(error?.localizedDescription, nil)
-                return
-            }
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case.success:
-                guard let responseData = data else {
-                    completion(NetworkResponse.noData.rawValue,nil)
-                    return
-                }
-                do {
-                    let apiResponse = try JSONDecoder().decode(CategoriesResponse.self, from: responseData)
-                    completion("ok", apiResponse)
-                }
-                catch {
-                    print(error)
-                    completion(NetworkResponse.unableToDecode.rawValue,nil)
-            }
-            case.failure(let error):
-                completion(error,nil)
-            }
+    func connect(completion:@escaping(_ error:String?,_ module: GeneralResponse?)->()) {
+        router.request(.connect, returning: GeneralResponse?.self) { error, response in
+            completion(error, response as? GeneralResponse)
         }
     }
     
-    func getCategory(id: Int, completion:@escaping(_ error:String?,_ module:CategoryResponse?)->()) {
-        router.request(.category(id: id)) {data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                completion(error?.localizedDescription, nil)
-                return
-            }
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case.success:
-                guard let responseData = data else {
-                    completion(NetworkResponse.noData.rawValue,nil)
-                    return
-                }
-                do {
-                    let apiResponse = try JSONDecoder().decode(CategoryResponse.self, from: responseData)
-                    completion("ok", apiResponse)
-                }
-                catch {
-                    print(error)
-                    completion(NetworkResponse.unableToDecode.rawValue,nil)
-            }
-            case.failure(let error):
-                completion(error,nil)
-            }
+    func getCategories(districtId: Int, hash: String?, completion:@escaping(_ error:String?,_ module:CategoriesResponse?)->()) {
+        router.request(.categories(districtId: districtId, hash: hash), returning: CategoriesResponse?.self) { error, response in
+            completion(error, response as? CategoriesResponse)
         }
     }
     
-    func getSubCategory(id: Int, completion:@escaping(_ error:String?,_ module:SubCategoryResponse?)->()) {
-        router.request(.subCategory(id: id)) {data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                completion(error?.localizedDescription, nil)
-                return
-            }
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case.success:
-                guard let responseData = data else {
-                    completion(NetworkResponse.noData.rawValue,nil)
-                    return
-                }
-                do {
-                    let apiResponse = try JSONDecoder().decode(SubCategoryResponse.self, from: responseData)
-                    completion("ok", apiResponse)
-                }
-                catch {
-                    print(error)
-                    completion(NetworkResponse.unableToDecode.rawValue,nil)
-            }
-            case.failure(let error):
-                completion(error,nil)
-            }
+    func getDistricts(completion:@escaping(_ error:String?,_ module: DistrictsResponse?)->()) {
+        router.request(.districts, returning: DistrictsResponse?.self) { error, response in
+            completion(error, response as? DistrictsResponse)
         }
     }
     
-    func getProduct(id: Int, completion:@escaping(_ error:String?,_ module:ProductResponse?)->()) {
-        router.request(.product(id: id)) {data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                completion(error?.localizedDescription, nil)
-                return
-            }
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case.success:
-                guard let responseData = data else {
-                    completion(NetworkResponse.noData.rawValue,nil)
-                    return
-                }
-                do {
-                    let apiResponse = try JSONDecoder().decode(ProductResponse.self, from: responseData)
-                    completion("ok", apiResponse)
-                }
-                catch {
-                    print(error)
-                    completion(NetworkResponse.unableToDecode.rawValue,nil)
-            }
-            case.failure(let error):
-                completion(error,nil)
-            }
+    func findDistrict(latitude: Double, longitude: Double, address: String, completion:@escaping(_ error:String?,_ module: FindDistrictResponse?)->()) {
+        router.request(.findDistrict(latitude: latitude, longitude: longitude, address: address), returning: FindDistrictResponse?.self) { error, response in
+            completion(error, response as? FindDistrictResponse)
         }
     }
     
-    func checkPhoneNumber(phone: String, completion:@escaping(_ error:String?,_ module: PhoneResponse?)->()) {
-        router.request(.checkPhoneNumber(phone: phone)) {data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                completion(error?.localizedDescription, nil)
-                return
-            }
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case.success:
-                guard let responseData = data else {
-                    completion(NetworkResponse.noData.rawValue,nil)
-                    return
-                }
-                do {
-                    let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                                        
-                                        print(jsonData)
-                    let apiResponse = try JSONDecoder().decode(PhoneResponse.self, from: responseData)
-                    if apiResponse.data == nil{
-                        do {
-                            let apiResponse = try JSONDecoder().decode(ErrorResponse.self, from: responseData)
-                            completion(apiResponse.error?.title, nil)
-                        } catch {
-                            completion(NetworkResponse.unableToDecode.rawValue,nil)
-                        }
-                    }
-                    completion(nil, apiResponse)
-                }
-                catch {
-                    completion(NetworkResponse.unableToDecode.rawValue,nil)
-                }
-            case.failure(let error):
-                completion(error,nil)
-            }
+    func checkPhoneNumber(phone: String, transactionId: String, completion:@escaping(_ error:String?,_ module: PhoneResponse?)->()) {
+        router.request(.checkPhoneNumber(phone: phone, transactionId: transactionId), returning: PhoneResponse?.self) { error, response in
+            completion(error, response as? PhoneResponse)
         }
     }
     
     func checkSmsCode(sms: String, transactionId: String, completion:@escaping(_ error:String?,_ module: CheckSmsResponse?)->()) {
-        router.request(.checkSmsCode(sms: sms, transactionId: transactionId)) {data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                completion(error?.localizedDescription, nil)
-                return
-            }
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case.success:
-                guard let responseData = data else {
-                    completion(NetworkResponse.noData.rawValue,nil)
-                    return
-                }
-                do {
-                    let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                    print(jsonData)
-                    let apiResponse = try JSONDecoder().decode(CheckSmsResponse.self, from: responseData)
-                    if apiResponse.data == nil{
-                        do {
-                            let apiResponse = try JSONDecoder().decode(ErrorResponse.self, from: responseData)
-                            completion(apiResponse.error?.title, nil)
-                        } catch {
-                            completion(NetworkResponse.unableToDecode.rawValue,nil)
-                        }
-                    }
-                    completion(nil, apiResponse)
-                }
-                catch {
-                    completion(NetworkResponse.unableToDecode.rawValue,nil)
-                }
-            case.failure(let error):
-                completion(error,nil)
-            }
+        router.request(.checkSmsCode(sms: sms, transactionId: transactionId), returning: CheckSmsResponse?.self) { error, response in
+            completion(error, response as? CheckSmsResponse)
         }
     }
     
     func resendSms(transactionId: String, completion:@escaping(_ error:String?,_ module: Bool?)->()) {
-        router.request(.resendSms(transactionId: transactionId)) {data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                completion(error?.localizedDescription, nil)
-                return
-            }
-            let result = self.handleNetworkResponse(response)
-            switch result {
-            case.success:
-                guard let responseData = data else {
-                    completion(NetworkResponse.noData.rawValue,nil)
-                    return
-                }
-                do {
-                    let jsonData = try JSONSerialization.jsonObject(with: responseData, options: .mutableContainers)
-                    if let myJson = jsonData as? [String: Any]{
-                        if myJson["data"] != nil{
-                            completion(nil, true)
-                        }
-                    }
-                    let apiResponse = try JSONDecoder().decode(ErrorResponse.self, from: responseData)
-                    completion(apiResponse.error?.title, nil)
-                }
-                catch {
-                    completion(NetworkResponse.unableToDecode.rawValue,nil)
-                }
-            case.failure(let error):
-                completion(error,nil)
-            }
+        router.request(.resendSms(transactionId: transactionId), returning: Bool?.self, boolResult: true) { error, response in
+            completion(error, response as? Bool)
         }
     }
     
-    let router = MyRouter<APIPoint>()
-    
-    fileprivate func handleNetworkResponse(_ response: HTTPURLResponse) -> Result<String>{
-            switch response.statusCode {
-            case 200...500: return .success
-            case 422: return .failure(NetworkResponse.badRequest.rawValue)
-    //        case 423...500: return .failure(NetworkResponse.authenticationError.rawValue)
-            case 500...599: return .failure(NetworkResponse.badRequest.rawValue)
-            case 600: return .failure(NetworkResponse.outdated.rawValue)
-            case 403: return .failure(NetworkResponse.unauthorized.rawValue)
-            default: return .failure(NetworkResponse.failed.rawValue)
-            }
+    func createOrder(products: [[String: Any]], totalAmount: Double, payment: PaymentTypes, info: String?, address: String, completion:@escaping(_ error:String?,_ module: CreateOrderResponse?)->()) {
+        router.request(.createOrder(products: products, totalAmount: totalAmount, payment: payment, info: info, address: address), returning: CreateOrderResponse?.self) { error, response in
+            completion(error, response as? CreateOrderResponse)
         }
-}
-
-enum Result<String>{
-    case success
-    case failure(String)
-}
-
-enum NetworkResponse:String {
-    case success
-    case authenticationError = "You need to be authenticated first."
-    case badRequest = "Bad request"
-    case outdated = "The url you requested is outdated."
-    case failed = "Network request failed."
-    case noData = "Response returned with no data to decode."
-    case unableToDecode = "We could not decode the response."
-    case unauthorized
+    }
+    
+    func getOrders(from: String?, to: String?, completion:@escaping(_ error:String?,_ module: GetOrdersResponse?)->()) {
+        router.request(.getOrders(from: from, to: to), returning: GetOrdersResponse?.self) { error, response in
+            completion(error, response as? GetOrdersResponse)
+        }
+    }
+    
+    func cancelOrder(orderId: Int, completion:@escaping(_ error:String?,_ module: GeneralResponse?)->()) {
+        router.request(.cancelOrder(orderId: orderId), returning: GeneralResponse?.self) { error, response in
+            completion(error, response as? GeneralResponse)
+        }
+    }
 }

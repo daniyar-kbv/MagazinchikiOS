@@ -11,6 +11,24 @@ import UIKit
 import SnapKit
 
 class BillView: UIView {
+    var order: Order? {
+        didSet {
+            numberValueLabel.text = "Заказ № \(order?.orderId ?? 0)"
+            dateValueLabel.text = order?.startDate?.formatDateTime(outputFormat: "dd.MM.yyyy, HH:mm")
+            if let paymentType = PaymentTypes(rawValue: order?.payment.type ?? "") {
+                switch paymentType {
+                case .card:
+                    typeValueLabel.text = "Банковской картой"
+                case .cash:
+                    typeValueLabel.text = "Наличными"
+                case .kaspi:
+                    typeValueLabel.text = "Kaspi переводом"
+                }
+            }
+            sumValueLabel.text = "\(order?.totalAmount?.formattedWithSeparator ?? "") KZT"
+        }
+    }
+    
     lazy var topBrush: UIView = {
         let view = UIView()
         view.backgroundColor = .customGray
@@ -38,6 +56,8 @@ class BillView: UIView {
         label.adjustsFontSizeToFitWidth = true
         return label
     }()
+    
+    lazy var mainView = UIView()
     
     lazy var billView: UIImageView = {
         let view = UIImageView()
@@ -168,7 +188,7 @@ class BillView: UIView {
     }
     
     func setUp(){
-        addSubViews([topBrush, backButton, shareButton, titleLabel, billView])
+        addSubViews([topBrush, backButton, shareButton, titleLabel, mainView])
         
         topBrush.snp.makeConstraints({
             $0.top.equalToSuperview().offset(10)
@@ -192,8 +212,15 @@ class BillView: UIView {
             $0.left.right.equalToSuperview().inset(StaticSize.s15)
         })
         
+        mainView.snp.makeConstraints({
+            $0.top.equalTo(titleLabel.snp.bottom)
+            $0.left.right.bottom.equalToSuperview()
+        })
+        
+        mainView.addSubview(billView)
+        
         billView.snp.makeConstraints({
-            $0.top.equalTo(titleLabel.snp.bottom).offset(StaticSize.s20)
+            $0.top.equalToSuperview().offset(StaticSize.s20)
             $0.left.right.equalToSuperview().inset(StaticSize.s15)
         })
         

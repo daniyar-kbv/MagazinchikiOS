@@ -39,4 +39,20 @@ extension String {
         attributedString.setAttributes([NSAttributedString.Key.font: changedFont], range: longestWordRange)
         return attributedString
     }
+    
+//    internal func getStatus() -> String {
+//
+//    }
+    
+    internal func formatDateTime(inputFormat: String = "yyyy-MM-dd'T'HH:mm:ss", outputFormat: String) -> String{
+        let dateFormatterIn = DateFormatter()
+        dateFormatterIn.dateFormat = inputFormat
+        let dateFormatterOut = DateFormatter()
+        dateFormatterOut.dateFormat = outputFormat
+        if let date = dateFormatterIn.date(from: self) {
+            return dateFormatterOut.string(from: date)
+        } else {
+            return ""
+        }
+    }
 }

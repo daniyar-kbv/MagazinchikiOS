@@ -1,0 +1,10 @@
+[
+    {
+        "types": "polyline",
+        "stylers": {
+            "zoom": [14, 16],
+            "hue": "#00F",
+            "scale": 2.0
+        }
+    }
+]

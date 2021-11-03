@@ -11,6 +11,7 @@ import UIKit
 import RxSwift
 
 class CartViewController: UIViewController {
+    lazy var viewModel = CartViewModel()
     lazy var cartView = CartView()
     var cart: Cart = AppShared.sharedInstance.cart {
         didSet{
@@ -23,6 +24,18 @@ class CartViewController: UIViewController {
         }
     }
     lazy var disposeBag = DisposeBag()
+    var paymentType: PaymentTypes = .cash {
+        didSet {
+            switch paymentType {
+            case .cash:
+                cartView.paymentTypeButton.setBottom(text: paymentTypes[2])
+            case .card:
+                cartView.paymentTypeButton.setBottom(text: paymentTypes[1])
+            case .kaspi:
+                cartView.paymentTypeButton.setBottom(text: paymentTypes[0])
+            }
+        }
+    }
     
     override func loadView() {
         super.loadView()
@@ -58,6 +71,18 @@ class CartViewController: UIViewController {
         AppShared.sharedInstance.cartSubject.subscribe(onNext: {cart in
             self.cart = cart
         }).disposed(by: disposeBag)
+        viewModel.orderId.subscribe(onNext: { orderId in
+            DispatchQueue.main.async {
+                AppShared.sharedInstance.cart.clear()
+                self.dismiss(animated: true, completion: {
+                    let nav = AppShared.sharedInstance.navigationController
+                    let vc = OrderFormingViewController()
+                    vc.orderId = orderId
+                    nav?.pushViewController(vc, animated: true)
+                    nav?.delegate = nil
+                })
+            }
+        }).disposed(by: disposeBag)
     }
     
     func configActions(){
@@ -67,12 +92,7 @@ class CartViewController: UIViewController {
     }
     
     @objc func orderTapped(){
-        AppShared.sharedInstance.cart.clear()
-        dismiss(animated: true, completion: {
-            let nav = AppShared.sharedInstance.navigationController
-            nav?.pushViewController(OrderFormingViewController(), animated: true)
-            nav?.delegate = nil
-        })
+        viewModel.createOrder(payment: paymentType)
     }
     
     func makeTableHeight(){

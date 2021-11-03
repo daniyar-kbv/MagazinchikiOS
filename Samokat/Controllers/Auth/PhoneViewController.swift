@@ -82,7 +82,7 @@ class PhoneViewController: UIViewController {
             DispatchQueue.main.async {
                 let vc = PhoneViewController()
                 vc.type = .code
-                vc.transctionId = data.transactionId
+                vc.transctionId = self.transctionId
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }).disposed(by: disposeBag)
@@ -91,9 +91,9 @@ class PhoneViewController: UIViewController {
                 self.error = error
             }
         }).disposed(by: disposeBag)
-        viewModel.token.subscribe(onNext: { token in
+        viewModel.smsResponseData.subscribe(onNext: { _ in
             DispatchQueue.main.async {
-                ModuleUserDefaults.setToken(token: token)
+                ModuleUserDefaults.setIsLoggedIn(true)
                 let vc = MainPageViewController()
                 self.navigationController?.pushViewController(vc, animated: true)
             }
@@ -104,7 +104,7 @@ class PhoneViewController: UIViewController {
                 self.phoneView.nextButton.isActive = false
                 self.codeButtonType = .check
             }
-        })
+            }).disposed(by: disposeBag)
     }
     
     func configActions() {
@@ -114,7 +114,9 @@ class PhoneViewController: UIViewController {
     @objc func nextTapped(){
         switch type {
         case .phone:
-            viewModel.checkPhoneNumber(phone: phoneView.field.text ?? "")
+            if let transactionId = transctionId{
+                viewModel.checkPhoneNumber(phone: phoneView.field.text ?? "", transactionId: transactionId)
+            }
         case .code:
             switch codeButtonType {
             case .resend:

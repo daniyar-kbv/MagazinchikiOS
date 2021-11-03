@@ -24,7 +24,7 @@ class ToCartButton: UIButton {
     var count: Int = 0 {
         didSet {
             DispatchQueue.main.async {
-                self.minusButton.isHidden = (self.count == 0 && self.withCart) || (self.count == 1 && !self.withCart)
+                self.minusButton.isHidden = self.count == 0 && self.withCart
                 self.plusButton.isHidden = self.count == 0 && self.withCart
                 if self.count == 0 && self.withCart{
                     self.setTitle("В корзину", for: .normal)
@@ -40,7 +40,7 @@ class ToCartButton: UIButton {
         view.setBackgroundImage(UIImage(named: "circleGreen"), for: .normal)
         view.setImage(UIImage(named: "minus"), for: .normal)
         view.addTarget(self, action: #selector(minusCount), for: .touchUpInside)
-        view.isHidden = (self.count == 0 && self.withCart) || (self.count == 1 && !self.withCart)
+        view.isHidden = self.count == 0 && self.withCart
         return view
     }()
     

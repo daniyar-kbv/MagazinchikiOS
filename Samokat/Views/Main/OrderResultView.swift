@@ -14,7 +14,6 @@ class OrderResultView: UIView {
     var type: OrderRusultType? {
         didSet {
             guard let type = type else { return }
-            print("aqwe")
             switch type {
             case .success:
                 topView.backgroundColor = .customGreen

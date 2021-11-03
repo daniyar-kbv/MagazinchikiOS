@@ -14,6 +14,7 @@ class ProductDetailView: UIView {
     var product: Product? {
         didSet{
             guard let product = product else { return }
+            photo.kf.setImage(with: URL(string: product.bigIcon ?? ""))
             if let oldPrice = product.price?.oldPrice{
                 oldPriceLabel.isHidden = false
                 let attributeString: NSMutableAttributedString =  NSMutableAttributedString(string: oldPrice)
@@ -22,8 +23,8 @@ class ProductDetailView: UIView {
             }
             newPriceLabel.text = "\(product.price?.currentPrice ?? "")₸"
             nameLabel.text = product.details?.title ?? ""
-            componentsView.setText(text: product.description ?? "")
-            makeView.setText(text: product.details?.unit ?? "")
+            componentsView.setText(text: product.description_ ?? "")
+            makeView.setText(text: product.details?.maker ?? "")
             if let properties = product.properties{
                 nutrientsStack.setValues(cals: properties.kcal ?? "", prots: properties.protein ?? "", fats: properties.fat ?? "", carbs: properties.carbohydrates ?? "")
             }
@@ -60,8 +61,8 @@ class ProductDetailView: UIView {
     
     lazy var photo: UIImageView = {
         let view = UIImageView()
-        view.contentMode = .scaleAspectFit
-        view.kf.setImage(with: URL(string: "https://dastarkhan24.kz/upload/iblock/e55/e55878eb073a1e7d7b5f41146fa5c882.jpg"))
+        view.contentMode = .scaleAspectFill
+        view.clipsToBounds = true
         return view
     }()
     

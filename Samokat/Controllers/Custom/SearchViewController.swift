@@ -11,6 +11,11 @@ import UIKit
 
 class SearchViewController: UIViewController {
     var searchView: SearchView
+    var products: [Product]? {
+        didSet {
+            searchView.collectionView.reloadData()
+        }
+    }
     
     required init(searchY: CGFloat) {
         searchView = SearchView(searchY: searchY)
@@ -32,6 +37,11 @@ class SearchViewController: UIViewController {
         super.viewDidLoad()
         
         searchView.cancelButton.addTarget(self, action: #selector(close), for: .touchUpInside)
+        searchView.searchField.field.addTarget(self, action: #selector(onFieldChange(_:)), for: .editingChanged)
+        searchView.collectionView.delegate = self
+        searchView.collectionView.dataSource = self
+        
+        hideKeyboardWhenTappedAround()
     }
     
     func open(){
@@ -61,5 +71,43 @@ class SearchViewController: UIViewController {
         }, completion: { finished in
             self.remove()
         })
+    }
+    
+    @objc func onFieldChange(_ textField: UITextField) {
+        guard let text = textField.text else { return }
+        products = AppShared.sharedInstance.searchProducts(text: text)
+    }
+}
+
+extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return products?.count ?? 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProductsCollectionViewCell.customReuseIdentifier, for: indexPath) as! ProductsCollectionViewCell
+        cell.product = products?[indexPath.row]
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: (collectionView.bounds.width / 2), height: StaticSize.s295)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let product = products?[indexPath.row]{
+            let toVc = ProductDetailViewController()
+            toVc.product = product
+            present(toVc, animated: true, completion: nil)
+        }
     }
 }

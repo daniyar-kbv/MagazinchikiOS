@@ -35,7 +35,15 @@ class SearchView: UIView {
     lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())
         view.backgroundColor = .white
-        view.isHidden = true
+        view.register(ProductsCollectionViewCell.self, forCellWithReuseIdentifier: ProductsCollectionViewCell.customReuseIdentifier)
+        view.collectionViewLayout = UICollectionViewFlowLayout()
+        view.delaysContentTouches = false
+        view.showsVerticalScrollIndicator = false
+        return view
+    }()
+    
+    lazy var cartView: CustomCartView = {
+        let view = CustomCartView()
         return view
     }()
     
@@ -52,7 +60,7 @@ class SearchView: UIView {
     }
     
     func setUp(){
-        addSubViews([backView, cancelButton, searchField, collectionView])
+        addSubViews([backView, cancelButton, searchField, collectionView, cartView])
         
         backView.snp.makeConstraints({
             $0.edges.equalToSuperview()
@@ -74,5 +82,19 @@ class SearchView: UIView {
             $0.top.equalTo(searchField.snp.bottom)
             $0.left.right.bottom.equalToSuperview()
         })
+
+        if AppShared.sharedInstance.cart.items?.count ?? 0 > 0{
+            cartView.snp.makeConstraints({
+                $0.left.right.equalToSuperview().inset(StaticSize.s15)
+                $0.height.equalTo(StaticSize.buttonHeight)
+                $0.bottom.equalToSuperview().offset(-Global.safeAreaBottom() - StaticSize.s15)
+            })
+        } else {
+            cartView.snp.makeConstraints({
+                $0.left.right.equalToSuperview().inset(StaticSize.s15)
+                $0.height.equalTo(StaticSize.buttonHeight)
+                $0.bottom.equalToSuperview().offset(StaticSize.buttonHeight)
+            })
+        }
     }
 }

@@ -11,25 +11,34 @@ import RxSwift
 
 class MainPageViewModel {
     let disposeBag  = DisposeBag()
-    
-    var categories: PublishSubject<[Category]>
+    var loadView: UIView?
     
     var response: CategoriesResponse? {
         didSet {
-            if let categories = response?.data?.categories {
+            if let data = response?.data, let categories = data.categories {
                 DispatchQueue.global(qos: .background).async {
-                    self.categories.onNext(categories)
+                    ModuleUserDefaults.setCategories(data: data)
                     AppShared.sharedInstance.categories = categories
                 }
             }
         }
     }
     
-    init(){
-        self.categories = PublishSubject<[Category]>()
-        SpinnerView.showSpinnerView()
-        APIManager.shared.getCategories(){ error, response in
+    func getCategories(){
+        guard let districtId = ModuleUserDefaults.getDistrctId() else { return }
+        SpinnerView.showSpinnerView(view: loadView)
+        APIManager.shared.getCategories(districtId: districtId, hash: nil){ error, response in
             SpinnerView.removeSpinnerView()
+            guard let response = response else {
+                if let loadView = self.loadView {
+                    if let error = error{
+                        ErrorView.addToView(view: loadView, text: error, withName: false, disableScroll: true)
+                    } else {
+                        ErrorView.addToView(view: loadView, withName: false, disableScroll: true)
+                    }
+                }
+                return
+            }
             self.response = response
         }
     }

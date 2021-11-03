@@ -12,6 +12,7 @@ import SnapKit
 
 class TopFilterView: UIButton {
     var isUp = true
+    var show = true
     
     lazy var backImage: UIImageView = {
         let view = UIImageView()

@@ -34,9 +34,6 @@ class PaymentTypeModalViewController: CustomModalViewController, UITableViewDele
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: PaymentTypeCell.customReuseIdentifier, for: indexPath) as! PaymentTypeCell
         cell.setTitle(text: paymentTypes[indexPath.row])
-        if indexPath.row == 1{
-            cell.cardView.isHidden = false
-        }
         return cell
     }
     
@@ -44,6 +41,21 @@ class PaymentTypeModalViewController: CustomModalViewController, UITableViewDele
         for i in 0..<paymentTypes.count{
             let cell = tableView.cellForRow(at: IndexPath(row: i, section: 0)) as! PaymentTypeCell
             cell.select(i == indexPath.row)
+            if let superVc = view.superview?.viewContainingController() as? CartViewController{
+                var type: PaymentTypes = .cash
+                switch indexPath.row {
+                case 0:
+                    type = .kaspi
+                case 1:
+                    type = .card
+                case 2:
+                    type = .cash
+                default:
+                    break
+                }
+                superVc.paymentType = type
+                super.animateDown()
+            }
         }
     }
 }

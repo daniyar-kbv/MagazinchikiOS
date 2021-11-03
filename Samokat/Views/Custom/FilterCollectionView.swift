@@ -13,7 +13,7 @@ import RxCocoa
 
 class FilterCollectionView: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     let disposeBag = DisposeBag()
-    var subCategories: [SubCategory]? {
+    var tags: [Tag]? {
         didSet{
             self.reloadData()
         }
@@ -30,8 +30,8 @@ class FilterCollectionView: UICollectionView, UICollectionViewDelegate, UICollec
         delaysContentTouches = false
         
         bind()
-        if subCategories == nil{
-            subCategories = AppShared.sharedInstance.subCategories
+        if tags == nil{
+            tags = AppShared.sharedInstance.tags
         }
     }
     
@@ -60,13 +60,13 @@ class FilterCollectionView: UICollectionView, UICollectionViewDelegate, UICollec
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return subCategories?.count ?? 0
+        return tags?.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FilterCollectionViewCell.customReuseIdentifier, for: indexPath) as! FilterCollectionViewCell
-        cell.setTitle(text: subCategories?[indexPath.row].title ?? "")
-        if subCategories?[indexPath.row].id == AppShared.sharedInstance.selectedFilter{
+        cell.setTitle(text: tags?[indexPath.row].name ?? "")
+        if tags?[indexPath.row].id == AppShared.sharedInstance.selectedFilter{
             cell.isActive = true
         }
         return cell
@@ -76,7 +76,7 @@ class FilterCollectionView: UICollectionView, UICollectionViewDelegate, UICollec
         let label = UILabel()
         label.font = .systemFont(ofSize: StaticSize.s12, weight: .medium)
         label.textColor = .customGreen
-        label.text = subCategories?[indexPath.row].title ?? ""
+        label.text = tags?[indexPath.row].name ?? ""
         label.sizeToFit()
         return CGSize(width: label.frame.width + StaticSize.s20, height: StaticSize.s36)
     }
@@ -86,17 +86,27 @@ class FilterCollectionView: UICollectionView, UICollectionViewDelegate, UICollec
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        AppShared.sharedInstance.selectedFilter = subCategories?[indexPath.row].id
+        AppShared.sharedInstance.selectedFilter = tags?[indexPath.row].id
     }
     
     func select(index: Int) {
         UIView.transition(with: self, duration: 0.1, options: .transitionCrossDissolve, animations: {
             for i in 0..<self.numberOfItems(inSection: 0){
                 if let cell = self.cellForItem(at: IndexPath(item: i, section: 0)) as? FilterCollectionViewCell{
-                    cell.isActive = self.subCategories?[i].id == index
+                    cell.isActive = self.tags?[i].id == index
                 }
             }
-        }, completion: nil)
+        }, completion: { finished in
+            self.layoutIfNeeded()
+        })
+    }
+    
+    func deselectAll(){
+        for i in 0..<self.numberOfItems(inSection: 0){
+            if let cell = self.cellForItem(at: IndexPath(item: i, section: 0)) as? FilterCollectionViewCell{
+                cell.isActive = false
+            }
+        }
     }
 }
 
@@ -119,5 +129,11 @@ class ProductFiltersCell: UICollectionViewCell{
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        filterCollection.deselectAll()
     }
 }

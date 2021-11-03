@@ -12,17 +12,24 @@ import UIKit
 class ProductsCollectionView: UICollectionView, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var topFullFiltersView = TopFullFiltersView()
     var didScroll = false
-    var category: Category? {
-        didSet {
-            if let selected = AppShared.sharedInstance.selectedFilter{
-                subCategory = category?.getSubcategory(id: selected)
-            }
-        }
-    }
     var subCategory: SubCategory? {
         didSet {
-            AppShared.sharedInstance.topFilterView.setTitle(text: subCategory?.title ?? "")
-            self.reloadData()
+            guard let subCategory = subCategory else { return }
+            let id = AppShared.sharedInstance.selectedFilter
+            if let id = id {
+                AppShared.sharedInstance.topFilterView.setTitle(text: AppShared.sharedInstance.tags?[id].name ?? "")
+            } else {
+                AppShared.sharedInstance.topFilterView.show = false
+            }
+            filteredProducts = subCategory.filterByTag(tagId: id)
+            topFullFiltersView.filtersCell.filterCollection.tags = subCategory.tags
+        }
+    }
+    var filteredProducts: [Product]? {
+        didSet {
+            reloadData() { _ in
+                self.filtersMove(up: true)
+            }
         }
     }
     
@@ -37,8 +44,6 @@ class ProductsCollectionView: UICollectionView, UICollectionViewDelegate, UIColl
         collectionViewLayout = UICollectionViewFlowLayout()
         delaysContentTouches = false
         showsVerticalScrollIndicator = false
-        
-        AppShared.sharedInstance.topFilterView.addTarget(self, action: #selector(openFilters), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
@@ -54,7 +59,7 @@ class ProductsCollectionView: UICollectionView, UICollectionViewDelegate, UIColl
         case 0:
             return 1
         case 1:
-            return subCategory?.products?.count ?? 0
+            return filteredProducts?.count ?? 0
         default:
             return 0
         }
@@ -64,11 +69,11 @@ class ProductsCollectionView: UICollectionView, UICollectionViewDelegate, UIColl
         switch indexPath.section {
         case 0:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProductFiltersCell.customReuseIdentifier, for: indexPath) as! ProductFiltersCell
-            cell.filterCollection.subCategories = category?.subCategories
+            cell.filterCollection.tags = subCategory?.tags
             return cell
         case 1:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProductsCollectionViewCell.customReuseIdentifier, for: indexPath) as! ProductsCollectionViewCell
-            cell.product = subCategory?.products?[indexPath.row]
+            cell.product = filteredProducts?[indexPath.row]
             return cell
         default:
             return UICollectionViewCell()
@@ -96,19 +101,11 @@ class ProductsCollectionView: UICollectionView, UICollectionViewDelegate, UIColl
     
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if indexPath.row == 0{
+            print(AppShared.sharedInstance.topFilterView.isUp)
+            print(didScroll)
+            print("\n")
             if AppShared.sharedInstance.topFilterView.isUp && didScroll{
-                let view = AppShared.sharedInstance.topFilterView
-                view.setTitle(text: filters[AppShared.sharedInstance.selectedFilter ?? 0])
-                
-                AppShared.sharedInstance.topFilterView.snp.updateConstraints({
-                    $0.top.equalToSuperview().offset(StaticSize.s15)
-                })
-                
-                UIView.animate(withDuration: 0.1, animations: {
-                    collectionView.superview?.layoutIfNeeded()
-                })
-                
-                AppShared.sharedInstance.topFilterView.isUp = false
+                filtersMove(up: false)
             }
         }
     }
@@ -116,23 +113,16 @@ class ProductsCollectionView: UICollectionView, UICollectionViewDelegate, UIColl
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         if indexPath.row == 0{
             if !AppShared.sharedInstance.topFilterView.isUp && didScroll{
-                AppShared.sharedInstance.topFilterView.snp.updateConstraints({
-                    $0.top.equalToSuperview().offset(-StaticSize.s50)
-                })
-                
-                UIView.animate(withDuration: 0.1, animations: {
-                    collectionView.superview?.layoutIfNeeded()
-                })
-                
-                AppShared.sharedInstance.topFilterView.isUp = true
+                filtersMove(up: true)
             }
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let vc = self.viewContainingController()
-        if let vc = vc, let id = subCategory?.products?[indexPath.row].id{
-            let toVc = ProductDetailViewController(id: id)
+        if let vc = vc, let product = subCategory?.products?[indexPath.row]{
+            let toVc = ProductDetailViewController()
+            toVc.product = product
             vc.present(toVc, animated: true, completion: nil)
         }
     }
@@ -165,13 +155,51 @@ class ProductsCollectionView: UICollectionView, UICollectionViewDelegate, UIColl
         self.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
     }
     
+    func filtersMove(up: Bool){
+        if !up {
+            AppShared.sharedInstance.topFilterView = TopFilterView()
+            AppShared.sharedInstance.topFilterView.addTarget(self, action: #selector(openFilters), for: .touchUpInside)
+        }
+        let view = AppShared.sharedInstance.topFilterView
+        
+        if !up, let superview = superview as? ProductsView {
+            superview.addSubview(view)
+            view.snp.makeConstraints({
+                $0.centerX.equalToSuperview()
+                $0.top.equalToSuperview().offset(-StaticSize.s50)
+            })
+            
+            superview.layoutIfNeeded()
+        }
+        
+        if let selected = AppShared.sharedInstance.selectedFilter, !up{
+            view.setTitle(text: subCategory?.getTag(tagId: selected)?.name ?? "")
+        }
+        
+        if let topSuperview = view.superview {
+            view.snp.updateConstraints({
+                $0.top.equalToSuperview().offset(up ? -StaticSize.s50 : StaticSize.s15)
+            })
+        }
+        
+        UIView.animate(withDuration: 0.1, animations: {
+            self.superview?.layoutIfNeeded()
+        }, completion: { _ in
+            if up{
+                AppShared.sharedInstance.topFilterView.removeFromSuperview()
+            }
+        })
+        
+        AppShared.sharedInstance.topFilterView.isUp = up
+    }
+    
     func calculateFilterCellSize() -> CGSize {
         var totalWidth: CGFloat = 0
-        for subCategory in category?.subCategories ?? []{
+        for tag in subCategory?.tags ?? []{
             let label = UILabel()
             label.font = .systemFont(ofSize: StaticSize.s12, weight: .medium)
             label.textColor = .customGreen
-            label.text = subCategory.title ?? ""
+            label.text = tag.name ?? ""
             label.sizeToFit()
             totalWidth += label.frame.size.width + StaticSize.s20
         }

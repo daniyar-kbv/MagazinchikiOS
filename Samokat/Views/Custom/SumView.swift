@@ -24,6 +24,7 @@ class SumView: UIStackView {
     
     lazy var promocodeView: SumSubview = {
         let view = SumSubview()
+        view.isHidden = true
         return view
     }()
     

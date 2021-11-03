@@ -29,7 +29,7 @@ class PromocodeModalView: UIView, UITextFieldDelegate{
     lazy var field: UITextField = {
         let view = UITextField()
         view.textColor = .customTextBlack
-        view.font = .sfProBold(size: 34)
+        view.font = .systemFont(ofSize: 34, weight: .bold)
         view.tintColor = .customLightGray
         view.keyboardType = .numberPad
         view.delegate = self

@@ -15,25 +15,31 @@ class CartTableViewCell: UITableViewCell {
     var product: Product? {
         didSet{
             guard let product = product else { return }
-            if let oldPrice = product.price?.oldPrice{
+            photo.backgroundColor = UIColor(hex: product.bgColor ?? "#cccccc")
+            if let oldPrice = Int(product.price?.oldPrice ?? "")?.formattedWithSeparator{
                 oldPriceLabel.isHidden = false
                 let attributeString: NSMutableAttributedString =  NSMutableAttributedString(string: oldPrice)
                 attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 1, range: NSMakeRange(0, attributeString.length))
                 oldPriceLabel.attributedText = attributeString
             }
-            newPriceLabel.text = "\(product.price?.currentPrice ?? "")₸"
+            newPriceLabel.text = "\(Int(product.price?.currentPrice ?? "")?.formattedWithSeparator ?? "")₸"
             nameLabel.text = product.details?.title ?? ""
             cartButton.product = product
         }
     }
     
-    lazy var photo: UIImageView = {
-        let view = UIImageView()
+    lazy var photo: UIView = {
+        let view = UIView()
         let mask = UIImageView(image: UIImage(named: "squareFigureSmall"))
         mask.frame.size = CGSize(width: StaticSize.s70, height: StaticSize.s70)
         view.mask = mask
-        view.kf.setImage(with: URL(string: "https://dastarkhan24.kz/upload/iblock/e55/e55878eb073a1e7d7b5f41146fa5c882.jpg"))
         view.layer.masksToBounds = true
+        return view
+    }()
+    
+    lazy var photoInner: UIImageView = {
+        let view = UIImageView()
+        view.kf.setImage(with: URL(string: "https://lh3.googleusercontent.com/proxy/aeceLnP_Na8z39BPgoDGkztDoSJOccZPvenyO9K72kTPV9_qd1kZiWjBdgR0TcNoNkxY-yU_EFKdereSeXy_toUk0NTwoR3esoWv8Lk7U9RzvaznW7YyaYq9agzSSDHL5q_BbbjLX10CJyPTqJDUG5GQJQ"))
         return view
     }()
     
@@ -41,20 +47,13 @@ class CartTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .systemFont(ofSize: StaticSize.s12, weight: .regular)
         label.textColor = .customTextBlack
-        label.numberOfLines = 2
+        label.numberOfLines = 3
         label.lineBreakMode = .byTruncatingTail
         return label
     }()
     
     lazy var cartButton: ToCartButton = {
         let view = ToCartButton(count: 1, withCart: false)
-        return view
-    }()
-    
-    lazy var closeButon: UIButton = {
-        let view = UIButton()
-        view.setBackgroundImage(UIImage(named: "cross"), for: .normal)
-        view.addTarget(self, action: #selector(removeItem), for: .touchUpInside)
         return view
     }()
     
@@ -73,11 +72,11 @@ class CartTableViewCell: UITableViewCell {
     }()
     
     lazy var priceStack: UIStackView = {
-        let view = UIStackView(arrangedSubviews: [oldPriceLabel, newPriceLabel])
-        view.axis = .vertical
+        let view = UIStackView(arrangedSubviews: [newPriceLabel, oldPriceLabel])
+        view.axis = .horizontal
         view.distribution = .equalSpacing
         view.alignment = .trailing
-        view.spacing = 0
+        view.spacing = StaticSize.s5
         return view
     }()
     
@@ -104,7 +103,7 @@ class CartTableViewCell: UITableViewCell {
     }
     
     func setUp() {
-        addSubViews([photo, nameLabel, cartButton, closeButon, priceStack, bottomLine])
+        addSubViews([photo, cartButton, nameLabel, priceStack, bottomLine])
         
         photo.snp.makeConstraints({
             $0.centerY.equalToSuperview()
@@ -112,28 +111,28 @@ class CartTableViewCell: UITableViewCell {
             $0.size.equalTo(StaticSize.s70)
         })
         
-        closeButon.snp.makeConstraints({
+        photo.addSubViews([photoInner])
+        photoInner.snp.makeConstraints({
+            $0.center.equalToSuperview()
+            $0.size.equalToSuperview().multipliedBy(0.85)
+        })
+        
+        cartButton.snp.makeConstraints({
             $0.top.equalTo(photo)
             $0.right.equalToSuperview()
-            $0.size.equalTo(StaticSize.s20)
+            $0.width.equalTo(StaticSize.s115)
+            $0.height.equalTo(StaticSize.s36)
         })
         
         nameLabel.snp.makeConstraints({
             $0.top.equalTo(photo)
             $0.left.equalTo(photo.snp.right).offset(StaticSize.s8)
-            $0.right.equalTo(closeButon.snp.left).offset(-StaticSize.s8)
-        })
-        
-        cartButton.snp.makeConstraints({
-            $0.bottom.equalToSuperview().offset(-StaticSize.s15)
-            $0.left.equalTo(nameLabel)
-            $0.width.equalTo((ScreenSize.SCREEN_WIDTH - StaticSize.s40) / 2)
-            $0.height.equalTo(StaticSize.s36)
+            $0.right.equalTo(cartButton.snp.left).offset(-StaticSize.s8)
         })
         
         priceStack.snp.makeConstraints({
-            $0.right.equalToSuperview()
-            $0.centerY.equalTo(cartButton)
+            $0.bottom.equalTo(photo)
+            $0.left.equalTo(nameLabel)
         })
         
         bottomLine.snp.makeConstraints({

@@ -9,16 +9,28 @@
 import Foundation
 import UIKit
 import SnapKit
+import YandexMapKit
 
 class LocationView: UIView {
-    lazy var mapView: UIView = {
-        let view = UIView()
+    lazy var mapView: YMKMapView = {
+        let view = YMKMapView()
         return view
     }()
     
     lazy var darkBackground: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
+        return view
+    }()
+    
+    lazy var backButton: UIButton = {
+        let view = UIButton()
+        return view
+    }()
+    
+    lazy var backButtonImage: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: "backButton")
         return view
     }()
     
@@ -82,10 +94,34 @@ class LocationView: UIView {
         return view
     }()
     
+    lazy var tableView: UITableView = {
+        let view = UITableView()
+        view.layoutMargins = .zero
+        view.separatorInset = .zero
+        view.separatorStyle = .none
+        return view
+    }()
+    
+    lazy var errorLabel: CustomLabelWithoutPadding = {
+        let view = CustomLabelWithoutPadding()
+        view.font = .systemFont(ofSize: StaticSize.s16, weight: .regular)
+        view.textColor = .customLightGray
+        view.isHidden = true
+        return view
+    }()
+    
     lazy var nextButton: CustomButton = {
         let view = CustomButton()
         view.setTitle("Везите сюда", for: .normal)
-//        view.isActive = false
+        view.isActive = false
+        return view
+    }()
+    
+    lazy var pinView: UIImageView = {
+        let width = StaticSize.s50
+        let height = width / 0.832
+        let view = UIImageView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        view.image = UIImage(named: "pin")
         return view
     }()
     
@@ -103,7 +139,22 @@ class LocationView: UIView {
     func setUp(){
         addSubview(mapView)
         mapView.snp.makeConstraints({
-            $0.edges.equalToSuperview()
+            $0.top.left.right.equalToSuperview()
+            $0.height.equalTo(0)
+        })
+        
+        addSubview(backButton)
+        backButton.snp.makeConstraints({
+            $0.top.equalToSuperview().offset(Global.safeAreaTop() + StaticSize.s10)
+            $0.left.equalToSuperview().offset(StaticSize.s10)
+            $0.size.equalTo(StaticSize.s40)
+        })
+        
+        backButton.addSubViews([backButtonImage])
+        backButtonImage.snp.makeConstraints({
+            $0.center.equalToSuperview()
+            $0.width.equalTo(StaticSize.s10)
+            $0.height.equalTo(StaticSize.s18)
         })
         
         addSubview(bottomContainer)
@@ -154,13 +205,30 @@ class LocationView: UIView {
             $0.height.equalTo(StaticSize.s40)
         })
         
+        bottomContainer.addSubview(tableView)
+        tableView.snp.makeConstraints({
+            $0.left.right.equalTo(fieldsStack)
+            $0.top.equalTo(fieldsStack.snp.bottom).offset(StaticSize.s10)
+        })
+        
+        bottomContainer.addSubview(errorLabel)
+        errorLabel.snp.makeConstraints({
+            $0.top.equalTo(fieldsStack.snp.bottom).offset(StaticSize.s5)
+            $0.left.right.equalTo(fieldsStack)
+        })
+        
         bottomContainer.addSubview(nextButton)
         nextButton.snp.makeConstraints({
-            $0.top.equalTo(fieldsStack.snp.bottom).offset(StaticSize.s30).priority(.low)
+            $0.top.equalTo(tableView.snp.bottom).offset(StaticSize.s30).priority(.low)
             $0.bottom.equalToSuperview().offset(-(Global.safeAreaBottom() + StaticSize.s15)).priority(.high)
             $0.left.right.equalToSuperview().inset(StaticSize.s15)
             $0.height.equalTo(StaticSize.buttonHeight)
         })
     }
-
+    
+    func showError(show: Bool, text: String = "") {
+        errorLabel.text = text
+        errorLabel.isHidden = !show
+        nextButton.isHidden = show
+    }
 }

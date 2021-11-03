@@ -72,20 +72,4 @@ class OrderResultViewController: UIViewController {
             nav?.popViewController(animated: true)
         }
     }
-    
-    func toMainCount() -> Int {
-        let nav = AppShared.sharedInstance.navigationController
-        guard let vcs = nav?.viewControllers else { return 2 }
-        var found = false
-        var count = 0
-        for vc in vcs{
-            if found {
-                count += 1
-            }
-            if vc is MainPageViewController{
-                found = true
-            }
-        }
-        return count
-    }
 }

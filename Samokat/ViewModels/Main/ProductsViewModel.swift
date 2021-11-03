@@ -36,19 +36,19 @@ class ProductsViewModel {
     
     init(id: Int) {
         self.category = PublishSubject<Category>()
-        SpinnerView.showSpinnerView()
-        APIManager.shared.getCategory(id: id){ error, response in
-            SpinnerView.removeSpinnerView()
-            self.response = response
-        }
+//        SpinnerView.showSpinnerView()
+//        APIManager.shared.getCategory(id: id){ error, response in
+//            SpinnerView.removeSpinnerView()
+//            self.response = response
+//        }
     }
     
     func getSubCategory(id: Int){
         self.subCategory = PublishSubject<SubCategory>()
-        SpinnerView.showSpinnerView()
-        APIManager.shared.getSubCategory(id: id){ error, response in
-            SpinnerView.removeSpinnerView()
-            self.subCategoryResponse = response
-        }
+//        SpinnerView.showSpinnerView()
+//        APIManager.shared.getSubCategory(id: id){ error, response in
+//            SpinnerView.removeSpinnerView()
+//            self.subCategoryResponse = response
+//        }
     }
 }

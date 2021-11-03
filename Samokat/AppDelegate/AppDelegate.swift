@@ -9,6 +9,7 @@
 import UIKit
 import AlamofireEasyLogger
 import Firebase
+import YandexMapKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -22,7 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
-        setCart()
+        YMKMapKit.setApiKey("03461173-83e2-40cb-a605-c70cb380a003")
+        setData()
+        print("Install id: \(ModuleUserDefaults.getUUID())")
         return true
     }
 
@@ -40,12 +43,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
-    func setCart(){
-        guard let cart = ModuleUserDefaults.getCart() else {
+    func setData(){
+        if let cart = ModuleUserDefaults.getCart(){
+            AppShared.sharedInstance.cart = cart
+        } else {
             AppShared.sharedInstance.cart = Cart(items: [])
-            return
         }
-        AppShared.sharedInstance.cart = cart
+        AppShared.sharedInstance.address = ModuleUserDefaults.getAddress()
+        
+        APIManager.shared.connect() { error, response  in
+            
+        }
     }
 }
 

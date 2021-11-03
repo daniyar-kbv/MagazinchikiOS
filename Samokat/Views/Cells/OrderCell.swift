@@ -10,8 +10,24 @@ import Foundation
 import UIKit
 import SnapKit
 
+protocol OrdersViewProtocol {
+    func onReClick(index: Int)
+}
+
 class OrderCell: UITableViewCell {
     static var customReuseIdentifier = "OrderCell"
+    
+    var order: Order? {
+        didSet {
+            numberLabel.text = "Заказ №\(order?.orderId ?? 0)"
+            if let status = StatusNames(rawValue: order?.status ?? "") {
+                statusLabel.setUpStatus(status: status)
+            }
+            dateLabel.text = order?.startDate?.formatDateTime(outputFormat: "dd MMMM, HH:mm")
+            addressLabel.text = order?.address
+            title.text = "\(order?.products?.count ?? 0) наименования на \(order?.totalAmount?.formattedWithSeparator ?? "") ₸"
+        }
+    }
     
     lazy var backView: UIImageView = {
         let view = UIImageView()
@@ -71,6 +87,7 @@ class OrderCell: UITableViewCell {
         let view = UIButton()
         view.setBackgroundImage(UIImage(named: "orderRectSmall"), for: .normal)
         view.setImage(UIImage(named: "cycle"), for: .normal)
+        view.isUserInteractionEnabled = true
         return view
     }()
     
@@ -86,14 +103,14 @@ class OrderCell: UITableViewCell {
     }
     
     func setUp(){
-        addSubViews([backView])
+        contentView.addSubViews([backView])
         
         backView.snp.makeConstraints({
             $0.left.right.equalToSuperview()
             $0.top.bottom.equalToSuperview().inset(-StaticSize.s5)
         })
         
-        backView.addSubViews([numberLabel, statusLabel, dateLabel, addressLabel, title, reButton])
+        backView.addSubViews([numberLabel, statusLabel, dateLabel, addressLabel, reButton, title])
         
         numberLabel.snp.makeConstraints({
             $0.left.top.equalToSuperview().inset(StaticSize.s15 + 15)
@@ -113,13 +130,30 @@ class OrderCell: UITableViewCell {
             $0.left.equalToSuperview().offset(StaticSize.s15 + 15)
         })
         
+        reButton.snp.makeConstraints({
+            $0.bottom.right.equalToSuperview().inset(15)
+            $0.size.equalTo(StaticSize.s40)
+        })
+        
         title.snp.makeConstraints({
             $0.bottom.equalToSuperview().offset(-StaticSize.s20 - 15)
             $0.left.equalToSuperview().offset(StaticSize.s15 + 15)
+            $0.right.equalTo(reButton.snp.left).priority(.low)
         })
-        
-        reButton.snp.makeConstraints({
-            $0.bottom.right.equalToSuperview().inset(15)
-        })
+    }
+    
+    override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch = touches.first
+        guard let location = touch?.location(in: contentView) else { return }
+        if reButton.frame.contains(location) {
+            AppShared.sharedInstance.cart.clear()
+            for product in order?.products ?? []{
+                AppShared.sharedInstance.cart?.change(product: product, type: .plus)
+            }
+            self.viewContainingController()?.dismiss(animated: true, completion: {
+                AppShared.sharedInstance.navigationController?.popToMain()
+                UIApplication.topViewController()?.present(CartViewController(), animated: true, completion: nil)
+            })
+        }
     }
 }

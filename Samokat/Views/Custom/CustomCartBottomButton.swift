@@ -15,12 +15,31 @@ class CustomCartBottomButton: UIButton {
         let label = UILabel()
         label.font = .systemFont(ofSize: StaticSize.s18, weight: .bold)
         label.textColor = .customTextBlack
+        label.isUserInteractionEnabled = false
         return label
     }()
     
-    lazy var arrowImage: UIImageView = {
+    lazy var bottomLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: StaticSize.s12, weight: .regular)
+        label.textColor = .customLightGray
+        label.adjustsFontSizeToFitWidth = true
+        label.isUserInteractionEnabled = false
+        return label
+    }()
+    
+    lazy var stackView: UIStackView = {
+        let view = UIStackView(arrangedSubviews: [nameLabel, bottomLabel])
+        view.axis = .vertical
+        view.distribution = .equalSpacing
+        view.alignment = .leading
+        view.spacing = StaticSize.s5
+        return view
+    }()
+    
+    lazy var leftImagee: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: "arrowDownBig")
+        view.image = UIImage(named: "dots")
         return view
     }()
     
@@ -35,20 +54,24 @@ class CustomCartBottomButton: UIButton {
     }
     
     func setUp() {
-        addSubViews([nameLabel, arrowImage])
+        addSubViews([stackView, leftImagee])
         
-        nameLabel.snp.makeConstraints({
-            $0.centerY.equalToSuperview()
-            $0.left.equalToSuperview()
+        stackView.snp.makeConstraints({
+            $0.left.centerY.equalToSuperview()
         })
         
-        arrowImage.snp.makeConstraints({
+        leftImagee.snp.makeConstraints({
             $0.centerY.equalToSuperview()
             $0.right.equalToSuperview()
+            $0.size.equalTo(StaticSize.s30)
         })
     }
     
     func setName(text: String){
         nameLabel.text = text
+    }
+    
+    func setBottom(text: String){
+        bottomLabel.text = text
     }
 }

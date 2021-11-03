@@ -12,12 +12,14 @@ import UIKit
 class AuthTextField: UIView, UITextFieldDelegate{
     
     var onReturn: (()->())?
+    var didChange: ((_ textField: UITextField)->())?
     
     lazy var textField: UITextField = {
         let view = UITextField()
         view.font = .systemFont(ofSize: StaticSize.s14, weight: .medium)
         view.textColor = .customTextBlack
         view.delegate = self
+        view.textContentType = .none
         return view
     }()
     
@@ -46,7 +48,6 @@ class AuthTextField: UIView, UITextFieldDelegate{
         
         addSubview(textField)
         textField.snp.makeConstraints({
-            print(self.constraints)
             $0.left.equalToSuperview().offset(StaticSize.s40/2.5)
             $0.centerY.equalToSuperview()
             $0.right.equalToSuperview().offset(-StaticSize.s40)
@@ -71,11 +72,22 @@ class AuthTextField: UIView, UITextFieldDelegate{
                 onReturn()
             }
             return false
+        } else {
+            if let didChange = didChange {
+                guard let text = textField.text else { return false }
+                let newString = (text as NSString).replacingCharacters(in: range, with: string)
+                textField.text = newString
+                didChange(textField)
+                return false
+            }
         }
         return true
     }
     
     @objc func erase(){
         textField.text = ""
+        if let didChange = didChange {
+            didChange(textField)
+        }
     }
 }

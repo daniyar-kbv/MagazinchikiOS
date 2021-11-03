@@ -47,10 +47,6 @@ class MainPageModalViewController: CustomModalViewController, UITableViewDelegat
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         animateDown()
-        let vc = ProductsViewController()
-        vc.title = AppShared.sharedInstance.categories?[indexPath.section].title ?? ""
-        vc.categoryId = AppShared.sharedInstance.categories?[indexPath.section].id
-        AppShared.sharedInstance.selectedFilter = AppShared.sharedInstance.categories?[indexPath.section].subCategories?.first?.id
-        self.navigationController?.pushViewController(vc, animated: true)
+        AppShared.sharedInstance.selectedCategory.onNext(indexPath.row)
     }
 }

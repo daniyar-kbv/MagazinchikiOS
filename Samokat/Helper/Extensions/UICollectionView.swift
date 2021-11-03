@@ -15,4 +15,10 @@ extension UICollectionView {
             self.reloadData()
         }, completion: onCompletion)
     }
+    
+    func reloadSections(_ indexSet: IndexSet, onCompletion: ((Bool) -> Void)?){
+        UIView.animate(withDuration: 0, animations: {
+            self.reloadSections(indexSet)
+        }, completion: onCompletion)
+    }
 }

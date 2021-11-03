@@ -60,6 +60,7 @@ class CartView: UIView {
         view.register(CartTableViewCell.self, forCellReuseIdentifier: CartTableViewCell.customReuseIdentifier)
         view.rowHeight = StaticSize.s1 * 110
         view.separatorStyle = .none
+        view.isScrollEnabled = false
         return view
     }()
     
@@ -79,12 +80,15 @@ class CartView: UIView {
     lazy var paymentTypeButton: CustomCartBottomButton = {
         let view = CustomCartBottomButton()
         view.setName(text: "Вид оплаты")
+        view.setBottom(text: "Наличными")
         return view
     }()
     
     lazy var promocodeButton: CustomCartBottomButton = {
         let view = CustomCartBottomButton()
         view.setName(text: "Промокод")
+        view.setBottom(text: "123456")
+        view.isHidden = true
         return view
     }()
     

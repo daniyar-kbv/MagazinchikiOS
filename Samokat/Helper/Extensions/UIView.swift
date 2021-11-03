@@ -10,6 +10,20 @@ import Foundation
 import UIKit
 
 extension UIView {
+    func showSpinnerViewFull(){
+        addSubview(SpinnerView.view)
+        SpinnerView.view.snp.makeConstraints({
+            $0.edges.equalToSuperview()
+        })
+    }
+    
+    func showSpinnerViewCenter(){
+        addSubview(SpinnerView.circleView)
+        SpinnerView.circleView.snp.makeConstraints({
+            $0.center.equalToSuperview()
+        })
+    }
+    
     func findConstraint(layoutAttribute: NSLayoutConstraint.Attribute) -> NSLayoutConstraint? {
         for constraint in constraints where itemMatch(constraint: constraint, layoutAttribute: layoutAttribute) {
             return constraint
@@ -51,5 +65,20 @@ extension UIView {
         } while nextResponder != nil
         
         return nil
+    }
+    
+    func asImage() -> UIImage {
+        if #available(iOS 10.0, *) {
+            let renderer = UIGraphicsImageRenderer(bounds: bounds)
+            return renderer.image { rendererContext in
+                layer.render(in: rendererContext.cgContext)
+            }
+        } else {
+            UIGraphicsBeginImageContext(self.frame.size)
+            self.layer.render(in:UIGraphicsGetCurrentContext()!)
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            return UIImage(cgImage: image!.cgImage!)
+        }
     }
 }

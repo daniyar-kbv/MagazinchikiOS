@@ -17,6 +17,7 @@ class ProductsCollectionViewCell: UICollectionViewCell {
     var product: Product? {
         didSet{
             guard let product = product else { return }
+            photo.backgroundColor = UIColor(hex: product.bgColor ?? "#cccccc")
             if let count = product.price?.count {
                 discountView.isHidden = false
                 discountLabel.text = "-\(count)%"
@@ -30,6 +31,7 @@ class ProductsCollectionViewCell: UICollectionViewCell {
             newPriceLabel.text = "\(product.price?.currentPrice ?? "")₸"
             descriptionLabel.text = product.details?.title ?? ""
             toCartButton.product = product
+            photoInner.kf.setImage(with: URL(string: product.icon ?? ""))
         }
     }
     
@@ -38,13 +40,17 @@ class ProductsCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
-    lazy var photo: UIImageView = {
-        let view = UIImageView()
+    lazy var photo: UIView = {
+        let view = UIView()
         let mask = UIImageView(image: UIImage(named: "squareFigure"))
         mask.frame.size = CGSize(width: (ScreenSize.SCREEN_WIDTH - StaticSize.s40) / 2, height: (ScreenSize.SCREEN_WIDTH - StaticSize.s40) / 2)
         view.mask = mask
-        view.kf.setImage(with: URL(string: "https://dastarkhan24.kz/upload/iblock/e55/e55878eb073a1e7d7b5f41146fa5c882.jpg"))
         view.layer.masksToBounds = true
+        return view
+    }()
+    
+    lazy var photoInner: UIImageView = {
+        let view = UIImageView()
         return view
     }()
     
@@ -113,6 +119,12 @@ class ProductsCollectionViewCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        toCartButton.count = 0
+    }
+    
     func setUp(){
         addSubViews([container])
         
@@ -128,7 +140,12 @@ class ProductsCollectionViewCell: UICollectionViewCell {
             $0.height.equalTo((ScreenSize.SCREEN_WIDTH - StaticSize.s40) / 2)
         })
         
-        photo.addSubViews([discountView])
+        photo.addSubViews([photoInner, discountView])
+        photoInner.snp.makeConstraints({
+            $0.center.equalToSuperview()
+            $0.size.equalToSuperview().multipliedBy(0.85)
+        })
+        
         discountView.snp.makeConstraints({
             $0.left.bottom.equalToSuperview()
         })

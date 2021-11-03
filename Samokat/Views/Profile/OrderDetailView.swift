@@ -12,6 +12,30 @@ import SnapKit
 
 class OrderDetailView: UIView{
     lazy var rowHeight = StaticSize.s1 * 65
+    var order: Order? {
+        didSet {
+            numberLabel.text = "Заказ №\(order?.orderId ?? 0)"
+            creationDateLabel.text = "Оформлен: \(order?.startDate?.formatDateTime(outputFormat: "dd MMMM, HH:mm") ?? "")"
+            switch order?.status {
+            case "CREATED":
+                currentStatusLabel.text = "В работе"
+            default:
+                currentStatusLabel.text = "Доставлен: \(order?.endDate?.formatDateTime(outputFormat: "dd MMMM, HH:mm") ?? "")"
+            }
+            sumValueLabel.text = "\(order?.totalAmount?.formattedWithSeparator ?? "")"
+            switch order?.payment.type {
+            case "CARD":
+                paymentTypeValueLabel.text = "Банковская карта"
+            case "KASPI":
+                paymentTypeValueLabel.text = "Kaspi перевод"
+            case "CASH":
+                paymentTypeValueLabel.text = "Наличными"
+            default:
+                break
+            }
+            addressValueLabel.text = order?.address ?? ""
+        }
+    }
     
     lazy var topBrush: UIView = {
         let view = UIView()
@@ -155,6 +179,7 @@ class OrderDetailView: UIView{
         view.distribution = .equalSpacing
         view.alignment = .leading
         view.spacing = StaticSize.s8
+        view.isHidden = true
         return view
     }()
     

@@ -19,8 +19,10 @@ class ErrorResponse: Codable  {
 class ErrorData: Codable {
     var title: String?
     var type: String?
+    var description: String?
+    var code: String?
     
     enum CodingKeys: String, CodingKey {
-        case title, type
+        case title, type, description, code
     }
 }

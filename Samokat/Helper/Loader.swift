@@ -28,6 +28,17 @@ class SpinnerView: UIView {
     static var view: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        let circleView: UIImageView = {
+            let view = UIImageView()
+            view.image = UIImage(named: "circle")
+            let spinner = SpinnerView()
+            view.addSubview(spinner)
+            spinner.snp.makeConstraints({
+                $0.center.equalToSuperview()
+                $0.size.equalTo(StaticSize.s44)
+            })
+            return view
+        }()
         view.addSubview(circleView)
         circleView.snp.makeConstraints({
             $0.center.equalToSuperview()
@@ -36,18 +47,17 @@ class SpinnerView: UIView {
         return view
     }()
     
-    static func showSpinnerView(){
-        if !isLoading{
-            guard let vc = UIApplication.topViewController() else { return }
-            vc.showSpinnerView()
+    static func showSpinnerView(view: UIView? = nil){
+        if let view = view{
+            view.showSpinnerViewCenter()
+        } else if let vc = UIApplication.topViewController() {
+            vc.view.showSpinnerViewFull()
         }
     }
     
     static func removeSpinnerView(){
-        if isLoading{
-            guard let vc = UIApplication.topViewController() else { return }
-            vc.removeSpinnerView()
-        }
+        SpinnerView.view.removeFromSuperview()
+        SpinnerView.circleView.removeFromSuperview()
     }
     
     override var layer: CAShapeLayer {

@@ -40,6 +40,10 @@ class OrdersView: UIView {
         view.rowHeight = StaticSize.s160
         view.register(OrderCell.self, forCellReuseIdentifier: OrderCell.customReuseIdentifier)
         view.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: Global.safeAreaBottom(), right: 0)
+        view.delaysContentTouches = false
+        view.showsVerticalScrollIndicator = false
+        view.allowsSelection = false
+        view.isUserInteractionEnabled = true
         return view
     }()
     

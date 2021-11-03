@@ -9,8 +9,11 @@
 import Foundation
 import UIKit
 import SnapKit
+import RxSwift
 
 class ProfileView: UIView {
+    lazy var disposeBag = DisposeBag()
+    
     lazy var phoneLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: StaticSize.s30, weight: .bold)
@@ -45,6 +48,7 @@ class ProfileView: UIView {
     
     lazy var cardView: UIView = {
         let view = UIView()
+        view.isHidden = true
         return view
     }()
     
@@ -61,7 +65,7 @@ class ProfileView: UIView {
         label.font = .systemFont(ofSize: StaticSize.s14, weight: .regular)
         label.textColor = .customLightGray
         label.adjustsFontSizeToFitWidth = true
-        label.text = "Орбита 1 микрорайон, дом 38, кв. 94"
+        label.text = AppShared.sharedInstance.address?.getAddress()
         return label
     }()
     
@@ -105,6 +109,7 @@ class ProfileView: UIView {
     
     lazy var helpView: UIView = {
         let view = UIView()
+        view.isHidden = true
         return view
     }()
     
@@ -122,10 +127,19 @@ class ProfileView: UIView {
         backgroundColor = .white
         
         setUp()
+        bind()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func bind(){
+        AppShared.sharedInstance.addressSubject.subscribe(onNext: {address in
+            DispatchQueue.main.async {
+                self.addressFullLabel.text = address.getAddress()
+            }
+        }).disposed(by: disposeBag)
     }
     
     func setUp(){

@@ -11,18 +11,15 @@ import UIKit
 import RxSwift
 
 class ProductDetailViewController: UIViewController {
-    lazy var detailView = ProductDetailView()
     lazy var disposeBag = DisposeBag()
+    lazy var detailView = ProductDetailView()
     var product: Product? {
         didSet {
             detailView.product = product
         }
     }
-    var productId: Int
-    var viewModel: ProductDetailViewModel?
     
-    required init(id: Int){
-        self.productId = id
+    required init(){
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -33,23 +30,25 @@ class ProductDetailViewController: UIViewController {
         super.viewDidLoad()
         
         detailView.toCartButton.addTarget(self, action: #selector(addToCart), for: .touchUpInside)
-        viewModel = ProductDetailViewModel(id: productId)
         bind()
-    }
-    
-    private func bind() {
-        guard let viewModel = viewModel else { return }
-        viewModel.product.subscribe(onNext: { product in
-            DispatchQueue.main.async {
-                self.product = product
-            }
-        }).disposed(by: disposeBag)
     }
     
     override func loadView() {
         super.loadView()
         
         view = detailView
+    }
+    
+    func bind() {
+        AppShared.sharedInstance.categoriesSubject.subscribe(onNext: { categories in
+            DispatchQueue.main.async {
+                if let id = self.product?.id, let product = AppShared.sharedInstance.findProduct(id: id){
+                    self.product = product
+                    return
+                }
+                self.dismiss(animated: true, completion: nil)
+            }
+            }).disposed(by: disposeBag)
     }
     
     @objc func addToCart(){

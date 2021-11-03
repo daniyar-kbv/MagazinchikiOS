@@ -46,7 +46,7 @@ class PhoneView: UIView, UITextFieldDelegate{
         let view = UITextField()
         view.textColor = .customTextBlack
         view.inputAccessoryView = inputButtonView
-        view.font = .sfProBold(size: 34)
+        view.font = .systemFont(ofSize: StaticSize.s34, weight: .bold)
         view.tintColor = .customLightGray
         view.keyboardType = .numberPad
         view.delegate = self

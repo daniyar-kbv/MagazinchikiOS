@@ -10,7 +10,7 @@ import Foundation
 
 class Cart: NSObject, NSCoding {
     var items: [CartItem]?
-    var totalPrice: Int?
+    var totalPrice: Double?
     
     enum OperationType {
         case plus
@@ -18,14 +18,14 @@ class Cart: NSObject, NSCoding {
         case remove
     }
     
-    init(items: [CartItem]?, totalPrice: Int? = 0) {
+    init(items: [CartItem]?, totalPrice: Double? = 0) {
         self.items = items
         self.totalPrice = totalPrice
     }
     
     required convenience init(coder aDecoder: NSCoder) {
         let items = aDecoder.decodeObject(forKey: "items") as? [CartItem]
-        let totalPrice = aDecoder.decodeObject(forKey: "totalPrice") as? Int
+        let totalPrice = aDecoder.decodeObject(forKey: "totalPrice") as? Double
         self.init(items: items, totalPrice: totalPrice)
     }
     
@@ -47,7 +47,6 @@ class Cart: NSObject, NSCoding {
                 case .minus:
                     item.count = count - 1
                     if item.count == 0 {
-                        print(items.firstIndex(of: item))
                         if let index = items.firstIndex(of: item){
                             self.items?.remove(at: index)
                         }
@@ -74,7 +73,7 @@ class Cart: NSObject, NSCoding {
         for item in items {
             price += (Int(item.product?.price?.currentPrice ?? "") ?? 0) * (item.count ?? 0)
         }
-        self.totalPrice = price
+        self.totalPrice = Double(price)
     }
     
     func getItem(productId: Int) -> CartItem? {

@@ -13,8 +13,6 @@ import RxSwift
 class ProductsViewController: UIViewController {
     lazy var disposeBag = DisposeBag()
     lazy var productsView = ProductsView()
-    var viewModel: ProductsViewModel?
-    var categoryId: Int?
     
     override func loadView() {
         super.loadView()
@@ -33,9 +31,6 @@ class ProductsViewController: UIViewController {
         navigationController?.delegate = self
         
         addBackButton()
-        if let id = categoryId{
-            viewModel = ProductsViewModel(id: id)
-        }
         bind()
     }
     
@@ -46,24 +41,31 @@ class ProductsViewController: UIViewController {
     }
     
     func bind(){
-        if let viewModel = viewModel{
-            viewModel.category.subscribe(onNext: { category in
-                DispatchQueue.main.async {
-                    self.productsView.productsCollection.category = category
-                    AppShared.sharedInstance.subCategories = category.subCategories
-                }
-                }).disposed(by: disposeBag)
-            viewModel.subCategory?.subscribe(onNext: { category in
-                DispatchQueue.main.async {
-                    self.productsView.productsCollection.subCategory = category
-                }
-                }).disposed(by: disposeBag)
-        }
         AppShared.sharedInstance.selectedFilterSubject.subscribe(onNext: {[weak self] selected in
             guard let self = self else {return}
             DispatchQueue.main.async {
-                self.viewModel?.getSubCategory(id: selected)
-                self.productsView.productsCollection.reloadData()
+                self.productsView.productsCollection.filteredProducts = self.productsView.productsCollection.subCategory?.filterByTag(tagId: selected)
+            }
+        }).disposed(by: disposeBag)
+        AppShared.sharedInstance.categoriesSubject.subscribe(onNext: { categories in
+            DispatchQueue.main.async {
+                guard let categoryId = self.productsView.productsCollection.subCategory?.categoryId else { return }
+                if let found = categories.first(where: {
+                    $0.id == categoryId
+                }){
+                    guard let subCategoryId = self.productsView.productsCollection.subCategory?.id else { return }
+                    if let subCategory = found.getSubcategory(id: subCategoryId){
+                        if let selectedFilter = AppShared.sharedInstance.selectedFilter {
+                            if !(subCategory.tags?.contains(where: {
+                                $0.id == selectedFilter
+                            }) ?? false) {
+                                AppShared.sharedInstance.selectedFilter = subCategory.tags?.first?.id
+                            }
+                            self.productsView.productsCollection.subCategory = subCategory
+                        }
+                    }
+                }
+                self.navigationController?.popViewController(animated: true)
             }
         }).disposed(by: disposeBag)
     }

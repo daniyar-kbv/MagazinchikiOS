@@ -14,7 +14,7 @@ class PhoneViewModel {
     
     lazy var phoneData = PublishSubject<PhoneData>()
     lazy var errorSubject = PublishSubject<String>()
-    lazy var token = PublishSubject<String>()
+    lazy var smsResponseData = PublishSubject<CheckSmsData>()
     lazy var resendSuccess = PublishSubject<Bool>()
     
     var phoneResponse: PhoneResponse? {
@@ -28,9 +28,9 @@ class PhoneViewModel {
     }
     var smsResponse: CheckSmsResponse? {
         didSet{
-            if let token = smsResponse?.data?.token{
+            if let data = smsResponse?.data{
                 DispatchQueue.global(qos: .background).async {
-                    self.token.onNext(token)
+                    self.smsResponseData.onNext(data)
                 }
             }
         }
@@ -45,12 +45,12 @@ class PhoneViewModel {
         }
     }
     
-    func checkPhoneNumber(phone: String){
+    func checkPhoneNumber(phone: String, transactionId: String){
         var formattedPhone = phone.replacingOccurrences(of: " ", with: "")
-        let range1 = formattedPhone.index(formattedPhone.startIndex, offsetBy: 2)..<formattedPhone.endIndex
+        let range1 = formattedPhone.index(formattedPhone.startIndex, offsetBy: 1)..<formattedPhone.endIndex
         formattedPhone = String(formattedPhone[range1])
         SpinnerView.showSpinnerView()
-        APIManager.shared.checkPhoneNumber(phone: formattedPhone){ error, response in
+        APIManager.shared.checkPhoneNumber(phone: formattedPhone, transactionId: transactionId){ error, response in
             SpinnerView.removeSpinnerView()
             guard let response = response else {
                 self.error = error

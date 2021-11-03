@@ -1,18 +1,18 @@
 {
   "images" : [
     {
-      "filename" : "frameBread.png",
+      "filename" : "Frame 46.png",
       "idiom" : "universal",
       "resizing" : {
         "cap-insets" : {
           "bottom" : 33,
           "left" : 33,
-          "right" : 141,
-          "top" : 145
+          "right" : 33,
+          "top" : 33
         },
         "center" : {
           "height" : 1,
-          "mode" : "tile",
+          "mode" : "stretch",
           "width" : 1
         },
         "mode" : "9-part"
@@ -20,18 +20,18 @@
       "scale" : "1x"
     },
     {
-      "filename" : "Frame 462x.png",
+      "filename" : "Frame 46@2x.png",
       "idiom" : "universal",
       "resizing" : {
         "cap-insets" : {
           "bottom" : 67,
           "left" : 67,
-          "right" : 281,
-          "top" : 290
+          "right" : 67,
+          "top" : 67
         },
         "center" : {
           "height" : 1,
-          "mode" : "tile",
+          "mode" : "stretch",
           "width" : 1
         },
         "mode" : "9-part"
@@ -39,18 +39,18 @@
       "scale" : "2x"
     },
     {
-      "filename" : "Frame 463x.png",
+      "filename" : "Frame 46@3x.png",
       "idiom" : "universal",
       "resizing" : {
         "cap-insets" : {
           "bottom" : 102,
           "left" : 102,
-          "right" : 422,
-          "top" : 434
+          "right" : 102,
+          "top" : 102
         },
         "center" : {
           "height" : 1,
-          "mode" : "tile",
+          "mode" : "stretch",
           "width" : 1
         },
         "mode" : "9-part"
